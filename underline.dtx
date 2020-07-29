@@ -28,6 +28,9 @@
 %<*driver>
 \documentclass{ltxdoc}
 \usepackage{underline}[2020/07/27]
+\usepackage{url}
+\usepackage{mathtools}
+\newcommand*{\mywadots}{\dots}
 \EnableCrossrefs         
 \CodelineIndex
 \RecordChanges
@@ -62,8 +65,7 @@
 %
 % \GetFileInfo{underline.dtx}
 %
-% \DoNotIndex{\newcommand,\newenvironment}
-% 
+% \DoNotIndex{\newcommand,\newenvironment,\RequirePackage,\NewDocumentCommand}
 %
 % \title{The \textsf{underline} package\thanks{This document
 %   corresponds to \textsf{underline}~\fileversion, dated \filedate.}}
@@ -73,23 +75,84 @@
 %
 % \section{Introduction}
 %
-% Put text here.
+% Underlining in \LaTeX{} is problematic for several reasons. At the
+% time of writing, no package (nor the default \cs{underline} command)
+% offers all of the following features:
+% \begin{itemize}
+% \item interrupt underlining so as to not intersect descenders;
+% \item account for line breaks, page breaks and hyphenation;
+% \item compatible with commands such as \cs{textit}, \cs{textbf}, \cs{em}, and \cs{bf}.
+% \item work within and around math mode;
+% \end{itemize}
+% Various existing packages offer some of these features (see, e.g., packages
+% \textsf{soul} and \textsf{ulem}), and support for all of them can be
+% achieved in several ways using combinations of these. The
+% \textsf{underline} package provides one such solution, originally
+% proposed by Peter Grill on StackExchange\footnote{See thread ``Using
+% soul with indirect formatting applied'' at
+% \url{https://tex.stackexchange.com/questions/125219/using-soul-with-indirect-formatting-applied}.},
+% which builds on the \textsf{soul} package.
+%
 %
 % \section{Usage}
 %
-% Put text here.
+% This package provides only one command with three optional arguments and one mandatory argument:
 %
-% \DescribeMacro{\whiten}
-% This macro 1 does nothing.\index{doing nothing|usage} It is merely an
-% example.  If this were a real macro, you would put a paragraph here
-% describing what the macro is supposed to do, what its mandatory and
-% optional arguments are, and so forth.
+% \DescribeMacro{\myul} \meta{\meta{around}} \oarg{below}
+% \oarg{thikness} \marg{text} The first optional argument
+% \meta{around} determines the space to leave around a descender (in
+% pixels). The second optional argument \meta{below} determines the
+% distance between the text line and the underline. The third optional
+% argument \meta{thikness} establishes the thickness of the
+% underline. The default values for the three arguments are 5, 0.2ex
+% and 0.1ex. Here are some examples with different values:
+% \begin{verbatim}
+% \myul{Millions saw the apple fall, but Newton asked why.}
+% \myul<15>{Millions saw the apple fall, but Newton asked why.}
+% \myul<10>[0.2ex][0.1ex]{Millions saw the apple fall, but Newton asked why.}
+% \myul<20>[0.3ex][0.1ex]{Millions saw the apple fall, but Newton asked why.}
+% \myul<10>[0.4ex][0.3ex]{Millions saw the apple fall, but Newton asked why.}
+% \end{verbatim}
+\vspace{-0.2cm}
+% produces\\
 %
-% \DescribeMacro{\myul}
-% This macro 2 does nothing.\index{doing nothing|usage} It is merely an
-% example.  If this were a real macro, you would put a paragraph here
-% describing what the macro is supposed to do, what its mandatory and
-% optional arguments are, and so forth.
+% \noindent
+% \myul{Millions saw the apple fall, but Newton asked why.}\\
+% \myul<15>{Millions saw the apple fall, but Newton asked why.}\\
+% \myul<10>[0.2ex][0.1ex]{Millions saw the apple fall, but Newton asked why.}\\
+% \myul<20>[0.3ex][0.1ex]{Millions saw the apple fall, but Newton asked why.}\\
+% \myul<10>[0.2ex][0.3ex]{Millions saw the apple fall, but Newton asked why.}\\
+%
+% The macro works in math environments and can include math enviroments:
+% \begin{verbatim}
+% The \myul{Diophantine equation $4xyz = yzn + xzn + xyn$},
+% which can be written as
+% \begin{align}
+%     \frac{1}{x} + \frac{1}{y} + \frac{1}{z} &= \frac{4}{n}
+%     \;\text{(assuming \myul{integer} coefficients)},
+% \end{align}
+% is conjectured to have a positive integer solution for all $n \geq 2$.
+% \end{verbatim}
+\vspace{-0.2cm}
+% produces\\
+%
+% \noindent The \myul{Diophantine equation $4xyz = yzn + xzn + xyn$}, which can be written as
+% \begin{align}
+%     \frac{1}{x} + \frac{1}{y} + \frac{1}{z} &= \frac{4}{n}
+%     \;\text{(assuming \myul{integer} coefficients)},
+% \end{align}
+% is \myul{conjectured} \cite{erdos-1950} to have a positive integer solution for all $n \geq 2$.
+%
+% \begin{thebibliography}{1}
+% 
+% \bibitem[Erd\H{o}s, 1950]{erdos-1950}
+% Erd\H{o}s, P. (1950).
+% \newblock Az {$1/x_1 + 1/x_2 + \mywadots + 1/x_n = a/b$} egyenlet eg\'esz
+%   sz\'am\'u megold\'asair\'ol (on a diophantine equation).
+% \newblock {\em Mat.~Lapok.}, 1:192--210.
+% \newblock In Hungarian.
+% 
+% \end{thebibliography}
 %
 % \StopEventually{}
 %
@@ -103,11 +166,8 @@
 \RequirePackage{xparse}%
 %    \end{macrocode}
 %
-%     This package defines two commands, which are described here.
-%
 % \begin{macro}{\whiten}
-% This is a dummy macro 1.  If it did anything, we'd describe its
-% implementation here.
+% Helper macro that is used to produce a white oultine around the text. This is superimposed over the underline to produce the interruptions for the descenders.
 %    \begin{macrocode}
 \ExplSyntaxOn
 \cs_new:Npn \white_text:n #1
@@ -125,8 +185,7 @@
 % \end{macro}
 %
 % \begin{macro}{\myul}
-% This is a dummy macro 2.  If it did anything, we'd describe its
-% implementation here.
+% The main user-callable macro exploits the \textsf{soul} package to scans the given text syllable by syllable. The \cs{whiten} command macro is called on each of these to stamp the necessary white halo around the underline. The underline itself is attained via the \textsf{soul}'s package \cs{ul} command.
 %    \begin{macrocode}
 \NewDocumentCommand{ \myul }{ D<>{5} O{0.2ex} O{0.1ex} +m } {%
 \begingroup
