@@ -42,7 +42,7 @@
 %</driver>
 % \fi
 %
-% \CheckSum{69}
+% \CheckSum{0}
 %
 % \CharacterTable
 %  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
@@ -169,11 +169,6 @@
 % \begin{macro}{\whiten}
 % Helper macro that is used to produce a white oultine around the text. This is superimposed over the underline to produce the interruptions for the descenders.
 %    \begin{macrocode}
-\soulregister{\ref}{7}
-\soulregister{\pageref}{7}
-\soulregister{\cite}{7}
-\soulregister{\citep}{7}
-\soulregister{\citet}{7}
 \ExplSyntaxOn
 \cs_new:Npn \white_text:n #1
   {
@@ -213,6 +208,60 @@
     \ul{#4}%
 \endgroup
 }
+
+\def\SOUL@docmd#1#2{%
+    \ifx9#1%
+        \def\SOUL@@{\SOUL@addgroup{#2}}%
+    \else\ifx8#1%
+        \SOUL@doword
+        \def\SOUL@@##1{%
+            \SOUL@token={\footnotemark}%
+            \SOUL@everytoken
+            \SOUL@syllable={\footnotemark}%
+            \SOUL@everysyllable
+            \footnotetext{##1}%
+            \SOUL@doword
+            \SOUL@scan
+        }%
+    \else\ifx7#1%
+        \SOUL@doword
+        \def\SOUL@@##1{%
+            \SOUL@token={#2{##1}}%
+            \SOUL@everytoken
+            \SOUL@syllable={#2{##1}}%
+            \SOUL@everysyllable
+            \SOUL@doword
+            \SOUL@scan
+        }%
+    \else\ifx1#1%
+        \SOUL@doword
+        \def\SOUL@@##1{%
+            #2{\protect\SOUL@do{##1}}%
+            \SOUL@scan
+        }%
+    \else\ifx2#1%
+        \SOUL@doword
+        \def\SOUL@@##1##2{%
+            #2{\protect\SOUL@do{##1}}{\protect\SOUL@do{##2}}%
+            \SOUL@scan
+        }%
+    \else\ifx3#1%
+        \SOUL@doword
+        \def\SOUL@@{\expandafter\SOUL@scan#2}%
+    \else\ifx4#1
+        \SOUL@doword
+        \def\@tempa{\renewcommand\SOUL@@[2][}%
+        \expandafter\expandafter\expandafter\@tempa\expandafter\SOUL@get@optional@argument#2]{#2[\protect\SOUL@do{##1}]{\protect\SOUL@do{##2}}}%
+    \else
+        \SOUL@doword
+        #2%
+        \let\SOUL@@\SOUL@scan
+    \fi\fi\fi\fi\fi\fi\fi
+    \SOUL@@
+}
+\def\SOUL@get@optional@argument#1#2#3#4{#4}%
+\makeatother
+
 %    \end{macrocode}
 % \end{macro}
 %
