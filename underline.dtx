@@ -31,6 +31,17 @@
 \usepackage{url}
 \usepackage{mathtools}
 \newcommand*{\mywadots}{\dots}
+
+\usepackage{xspace}
+\newcommand{\mymacroA}[2]{\textit{#1} affected? (#2)}
+\soulregister\mymacroA{1}
+\newcommand{\mymacroB}[2]{\textit{#1} affected? (#2)}
+\soulregister\mymacroB{2}
+\newcommand{\mymacroC}[2]{\textit{#1} affected? (#2)}
+\soulregister\mymacroC{3}
+\newcommand{\mymacroD}[2][Default]{\textit{#1} affected? (#2)}
+\soulregister\mymacroD{4}
+
 \EnableCrossrefs         
 \CodelineIndex
 \RecordChanges
@@ -154,6 +165,23 @@
 % 
 % \end{thebibliography}
 %
+% \DescribeMacro{\soulregister} \marg{command} \marg{num} The
+% \cs{myul} macro may include user-defined commands. However, these
+% need to be registered with the underlying \textsf{soul} package, and
+% this is dine using the \cs{soulregister} command. The first argument
+% \meta{command} is the name of the command to register. The second
+% argument \meta{num} indicates how the command should be treated with
+% respect to underlining. Possible values for \meta{num} are:
+% 
+% \begin{tabular}{rll}
+%   \meta{num} & {\bf Underlining applied to} & {\bf Example}\\
+%   1 & Entire contests of the macro & \myul{\mymacroA{one}{two}}\\
+%   2 & Given arguments only & \myul{\mymacroB{one}{two}}\\
+%   3 & Entire expansion & \myul{\mymacroC{one}{two}}\\
+%   4 & Given arguments + default optional arg & \myul{\mymacroD{one}{two}}\\
+% \end{tabular}
+%
+% 
 % \StopEventually{}
 %
 % \section{Implementation}
@@ -166,49 +194,9 @@
 \RequirePackage{xparse}%
 %    \end{macrocode}
 %
-% \begin{macro}{\whiten}
-% Helper macro that is used to produce a white oultine around the text. This is superimposed over the underline to produce the interruptions for the descenders.
+% The follwoing definition enables the use of user-defined commands
+% with optional arguments within the \cs{myul} command.
 %    \begin{macrocode}
-\ExplSyntaxOn
-\cs_new:Npn \white_text:n #1
-  {
-    \fp_set:Nn \l_tmpa_fp {#1 * .01}
-    \llap{\textcolor{white}{\the\SOUL@syllable}\hspace{\fp_to_decimal:N \l_tmpa_fp em}}
-    \llap{\textcolor{white}{\the\SOUL@syllable}\hspace{-\fp_to_decimal:N \l_tmpa_fp em}}
-  }
-\NewDocumentCommand{\whiten}{ m }
-    {
-      \int_step_function:nnnN {1}{1}{#1} \white_text:n
-    }
-\ExplSyntaxOff
-%    \end{macrocode}
-% \end{macro}
-%
-% \begin{macro}{\myul}
-% The main user-callable macro exploits the \textsf{soul} package to scans the given text syllable by syllable. The \cs{whiten} command macro is called on each of these to stamp the necessary white halo around the underline. The underline itself is attained via the \textsf{soul}'s package \cs{ul} command.
-%    \begin{macrocode}
-\NewDocumentCommand{ \myul }{ D<>{5} O{0.2ex} O{0.1ex} +m } {%
-\begingroup
-\setul{#2}{#3}%
-\def\SOUL@uleverysyllable{%
-   \setbox0=\hbox{\the\SOUL@syllable}%
-   \ifdim\dp0>\z@
-      \SOUL@ulunderline{\phantom{\the\SOUL@syllable}}%
-      \whiten{#1}%
-      \llap{%
-        \the\SOUL@syllable
-        \SOUL@setkern\SOUL@charkern
-      }%
-   \else
-       \SOUL@ulunderline{%
-         \the\SOUL@syllable
-         \SOUL@setkern\SOUL@charkern
-       }%
-   \fi}%
-    \ul{#4}%
-\endgroup
-}
-
 \def\SOUL@docmd#1#2{%
     \ifx9#1%
         \def\SOUL@@{\SOUL@addgroup{#2}}%
@@ -260,8 +248,55 @@
     \SOUL@@
 }
 \def\SOUL@get@optional@argument#1#2#3#4{#4}%
-\makeatother
-
+%    \end{macrocode}
+%
+% \begin{macro}{\whiten}
+% Helper macro that is used to produce a white oultine around the text. This is superimposed over the underline to produce the interruptions for the descenders.
+%    \begin{macrocode}
+\soulregister{\ref}{7}
+\soulregister{\pageref}{7}
+\soulregister{\cite}{7}
+\soulregister{\citep}{7}
+\soulregister{\citet}{7}
+\ExplSyntaxOn
+\cs_new:Npn \white_text:n #1
+  {
+    \fp_set:Nn \l_tmpa_fp {#1 * .01}
+    \llap{\textcolor{white}{\the\SOUL@syllable}\hspace{\fp_to_decimal:N \l_tmpa_fp em}}
+    \llap{\textcolor{white}{\the\SOUL@syllable}\hspace{-\fp_to_decimal:N \l_tmpa_fp em}}
+  }
+\NewDocumentCommand{\whiten}{ m }
+    {
+      \int_step_function:nnnN {1}{1}{#1} \white_text:n
+    }
+\ExplSyntaxOff
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\myul}
+% The main user-callable macro exploits the \textsf{soul} package to scans the given text syllable by syllable. The \cs{whiten} command macro is called on each of these to stamp the necessary white halo around the underline. The underline itself is attained via the \textsf{soul}'s package \cs{ul} command.
+%    \begin{macrocode}
+\NewDocumentCommand{ \myul }{ D<>{5} O{0.2ex} O{0.1ex} +m } {%
+\begingroup
+\setul{#2}{#3}%
+\def\SOUL@uleverysyllable{%
+   \setbox0=\hbox{\the\SOUL@syllable}%
+   \ifdim\dp0>\z@
+      \SOUL@ulunderline{\phantom{\the\SOUL@syllable}}%
+      \whiten{#1}%
+      \llap{%
+        \the\SOUL@syllable
+        \SOUL@setkern\SOUL@charkern
+      }%
+   \else
+       \SOUL@ulunderline{%
+         \the\SOUL@syllable
+         \SOUL@setkern\SOUL@charkern
+       }%
+   \fi}%
+    \ul{#4}%
+\endgroup
+}
 %    \end{macrocode}
 % \end{macro}
 %
